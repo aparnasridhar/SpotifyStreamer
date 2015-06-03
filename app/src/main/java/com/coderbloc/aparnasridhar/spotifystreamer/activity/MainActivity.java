@@ -1,4 +1,4 @@
-package com.coderbloc.aparnasridhar.spotifystreamer.com.coderbloc.aparnasridhar.spotifystreamer.activities;
+package com.coderbloc.aparnasridhar.spotifystreamer.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;

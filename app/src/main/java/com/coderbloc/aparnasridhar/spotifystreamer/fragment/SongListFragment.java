@@ -15,8 +15,6 @@ import android.widget.Toast;
 
 import com.coderbloc.aparnasridhar.spotifystreamer.R;
 
-import java.util.ArrayList;
-
 public class SongListFragment extends Fragment {
     ArrayAdapter<String> adapter;
 
@@ -59,6 +57,14 @@ public class SongListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        String[] songArray = {
+               "Summer of 69",
+                "18 Till I Die",
+                "Have you ever really loved a woman?",
+                "Night to Remember",
+                "On a day like Today"
+
+        };
         adapter = new ArrayAdapter<String>
                 (
                         //Context
@@ -66,9 +72,9 @@ public class SongListFragment extends Fragment {
                         //ID of list item layout
                         R.layout.song_list_item,
                         //Id of frame to populate
-                        R.id.song_item_frame,
+                        R.id.artist_name,
                         //Forecast data
-                        new ArrayList<String>());
+                        songArray);
         final View rootView = inflater.inflate(R.layout.fragment_song_list, container, false);
 
 
