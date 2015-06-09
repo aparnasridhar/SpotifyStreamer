@@ -13,5 +13,6 @@
 
     <string name="no_artists_error">No artists matched your search</string>
     <string name="no_track_error">No top ten tracks for this artist</string>
+    <string name="no_internet">Not able to connect to Spotify Site.  Check network connectivity</string>
 
 </resources>

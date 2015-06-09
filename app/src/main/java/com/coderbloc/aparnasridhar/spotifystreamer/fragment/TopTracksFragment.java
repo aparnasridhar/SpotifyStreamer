@@ -1,6 +1,9 @@
 package com.coderbloc.aparnasridhar.spotifystreamer.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -73,7 +76,6 @@ public class TopTracksFragment extends Fragment {
 
 
         final View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
-
         adapter = new TopTracksAdapter(getActivity(),new ArrayList<Track>());
         ListView view = (ListView) rootView.findViewById(R.id.listview_songlist);
         view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -92,9 +94,21 @@ public class TopTracksFragment extends Fragment {
         if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
             spotifyID = intent.getStringExtra(Intent.EXTRA_TEXT);
         }
-        task = new FetchTopTracksTask();
-        task.execute(spotifyID);
+        if(isNetworkAvailable()) {
+            task = new FetchTopTracksTask();
+            task.execute(spotifyID);
+        } else{
+            Toast.makeText(getActivity(),getResources().getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
+
+        }
         return rootView;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public class FetchTopTracksTask extends AsyncTask<String,Void,List<Track>> {
@@ -117,10 +131,14 @@ public class TopTracksFragment extends Fragment {
 
             query.put("country","US");
             Tracks tracksResult = spotify.getArtistTopTrack(params[0], query);
-            trackList = tracksResult.tracks;
 
-            SongList list = new SongList();
-            list.setTopTenSongs(trackList);
+            if(tracksResult !=null) {
+                SongList list = new SongList();
+                trackList = tracksResult.tracks;
+                list.setTopTenSongs(trackList);
+            } else {
+                Toast.makeText(getActivity(),getResources().getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
+            }
 
             return trackList;
         }

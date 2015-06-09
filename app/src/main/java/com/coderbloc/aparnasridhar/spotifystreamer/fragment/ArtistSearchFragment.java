@@ -1,6 +1,9 @@
 package com.coderbloc.aparnasridhar.spotifystreamer.fragment;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -96,8 +99,12 @@ public class ArtistSearchFragment extends Fragment {
                 if (i == EditorInfo.IME_NULL
                         && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
                     searchKeyword = searchText.getText().toString();
-                    FetchArtistTask task = new FetchArtistTask();
-                    task.execute(searchKeyword);
+                    if(isNetworkAvailable()) {
+                        FetchArtistTask task = new FetchArtistTask();
+                        task.execute(searchKeyword);
+                    }else {
+                        Toast.makeText(getActivity(),getResources().getString(R.string.no_internet),Toast.LENGTH_SHORT).show();
+                    }
 
                 }
                 return false;
@@ -109,6 +116,13 @@ public class ArtistSearchFragment extends Fragment {
         view.setAdapter(adapter);
 
         return rootView;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public class FetchArtistTask extends AsyncTask<String,Void,List<Artist>>{
@@ -129,6 +143,7 @@ public class ArtistSearchFragment extends Fragment {
             ArtistsPager searchResults = spotify.searchArtists(params[0]);
             Pager<Artist> artists = searchResults.artists;
             artistList = artists.items;
+
             return artistList;
         }
 
