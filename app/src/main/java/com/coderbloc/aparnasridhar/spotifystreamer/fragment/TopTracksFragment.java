@@ -1,10 +1,8 @@
 package com.coderbloc.aparnasridhar.spotifystreamer.fragment;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +34,7 @@ public class TopTracksFragment extends Fragment {
     TopTracksAdapter adapter;
     private String spotifyID;
     FetchTopTracksTask task;
+    private List<Track> trackList;
 
     private SongList tracks;
 
@@ -54,7 +53,6 @@ public class TopTracksFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
     }
 
     @Override
@@ -116,11 +114,8 @@ public class TopTracksFragment extends Fragment {
 
             Map<String, Object> query = new HashMap<String, Object>();
 
-            //Check shared preferences for User's Country Code - default is US
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String locationCode = prefs.getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default));
 
-            query.put("country",locationCode);
+            query.put("country","US");
             Tracks tracksResult = spotify.getArtistTopTrack(params[0], query);
             trackList = tracksResult.tracks;
 
