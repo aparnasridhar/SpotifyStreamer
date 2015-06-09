@@ -118,6 +118,7 @@ public class ArtistSearchFragment extends Fragment {
         return rootView;
     }
 
+    //Based on a stackoverflow snippet
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
