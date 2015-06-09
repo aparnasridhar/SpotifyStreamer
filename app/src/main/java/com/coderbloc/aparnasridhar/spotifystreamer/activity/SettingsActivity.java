@@ -10,6 +10,8 @@ import com.coderbloc.aparnasridhar.spotifystreamer.R;
 
 /**
  * Created by aparnasridhar on 6/5/15.
+ * Created to support changing the country for later activities
+ * Here only supports entry - doesn't use the value yet
  */
 public class SettingsActivity extends PreferenceActivity
         implements Preference.OnPreferenceChangeListener {
