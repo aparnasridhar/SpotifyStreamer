@@ -1,4 +1,7 @@
 
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -52,10 +55,34 @@
         android:indeterminate="false"
         android:id="@+id/audioSeekBar"/>
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:text = "0:00"
+            android:id="@+id/playerStart"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_gravity="right"
+            android:text = "0:30"
+            android:id="@+id/playerEnd"/>
+
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="100dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center">
     <ImageButton
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -83,5 +110,14 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:id="@+id/progressbar_play"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone" />
+
 </LinearLayout>
 
+</ScrollView>

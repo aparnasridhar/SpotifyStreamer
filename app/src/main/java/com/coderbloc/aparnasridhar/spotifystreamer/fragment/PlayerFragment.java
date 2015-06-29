@@ -1,41 +1,98 @@
 package com.coderbloc.aparnasridhar.spotifystreamer.fragment;
 
+import android.app.Dialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.coderbloc.aparnasridhar.spotifystreamer.R;
 import com.coderbloc.aparnasridhar.spotifystreamer.model.SongList;
+import com.coderbloc.aparnasridhar.spotifystreamer.service.SpotifyMusicService;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import kaaes.spotify.webapi.android.models.Track;
 
 
-public class PlayerFragment extends Fragment {
+public class PlayerFragment extends DialogFragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener{
 
-    private MediaPlayer mediaPlayer;
     private List<Track> trackList;
-    private int playPosition;
-    private int currentTrackPosition = 0;
-    private boolean isPaused = true;
+    private int playPosition = 0;
+    private boolean hasStarted = false;
     private View rootView;
     private ImageButton play;
     private ImageButton previous;
     private ImageButton next;
+    private TextView playStart;
+    private TextView playEnd;
+    private ProgressBar progressBar;
+
+    private SpotifyMusicService musicSrv;
+    private Intent playIntent;
+    public ServiceConnection musicConnection;
+    private SeekBar playerSeekBar;
+
+    //To update the seek bar
+    Handler seekHandler = new Handler();
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            updateSeekBar();
+        }
+
+    };
+
+    public void updateSeekBar(){
+        try {
+            if (musicSrv.isPlaying()) {
+                playStart.setText(formatTime(musicSrv.getCurrentPosition()));
+                playEnd.setText(formatTime(musicSrv.getDuration()));
+                playerSeekBar.setMax(musicSrv.getDuration());
+                playerSeekBar.setProgress(musicSrv.getCurrentPosition());
+                play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
+
+            } else if (playerSeekBar.getProgress() > 0){
+                play.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+                playerSeekBar.setProgress(0);
+                playStart.setText("0:00");
+            }
+            seekHandler.postDelayed(run, 1000);
+        } catch (Exception e){
+
+        }
+    }
+
+
+    private String formatTime(long millis){
+        StringBuffer buffer = new StringBuffer();
+
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+        String secondStr = String.valueOf(seconds);
+        if(secondStr.length() < 2){
+            secondStr = "0"+secondStr;
+        }
+        buffer.append("0").append(":").append(secondStr);
+        return buffer.toString();
+    }
 
     public PlayerFragment(){
 
@@ -47,23 +104,62 @@ public class PlayerFragment extends Fragment {
         super.onStart();
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        //Receive the track to play
+        Intent intent = getActivity().getIntent();
+        if(intent != null && intent.hasExtra("position")){
+            playPosition = intent.getIntExtra("position",-1);
+        }
+
+        //Load all tracks
+        final SongList tracks = new SongList();
+        trackList = tracks.getTopTenSongs();
+        //connect to the service
+        musicConnection = new ServiceConnection(){
+
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                SpotifyMusicService.MusicBinder binder = (SpotifyMusicService.MusicBinder)service;
+                //get service
+                musicSrv = binder.getService();
+                //pass list
+                musicSrv.setPlayList(tracks);
+                //
+                playSong(playPosition);
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+            }
+        };
+
+        if(playIntent==null){
+            playIntent = new Intent(getActivity(), SpotifyMusicService.class);
+            getActivity().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
+            getActivity().startService(playIntent);
+        }
+
     }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
 
-        int id = item.getItemId();
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -78,19 +174,9 @@ public class PlayerFragment extends Fragment {
         albumName.setText(currentTrack.album.name);
         artistName.setText(currentTrack.artists.get(0).name);
         String url = currentTrack.album.images.get(currentTrack.album.images.size() - 2).url;
-        Picasso.with(getActivity()).load(url).placeholder(R.drawable.ic_launcher).into(albumCover);
 
-        if(position == trackList.size()-1){
-            next.setEnabled(false);
-        } else {
-            next.setEnabled(true);
-        }
-
-
-        if(position == 0){
-            previous.setEnabled(false);
-        } else {
-            previous.setEnabled(true);
+        if(url !=null ) {
+            Picasso.with(getActivity()).load(url).placeholder(R.drawable.ic_launcher).into(albumCover);
         }
     }
 
@@ -101,31 +187,47 @@ public class PlayerFragment extends Fragment {
 
         rootView = inflater.inflate(R.layout.fragment_player, container, false);
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
 
-        //Receive the track to play
-        Intent intent = getActivity().getIntent();
-        if(intent != null && intent.hasExtra("position")){
-            playPosition = intent.getIntExtra("position",-1);
-        }
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressbar_play);
 
-        //Load all tracks
-        SongList tracks = new SongList();
-        trackList = tracks.getTopTenSongs();
+        playerSeekBar = (SeekBar) rootView.findViewById(R.id.audioSeekBar);
+        playerSeekBar.setVisibility(View.VISIBLE);
+        playerSeekBar.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
+        seekHandler.postDelayed(run, 1000);
+
+        playStart = (TextView) rootView.findViewById(R.id.playerStart);
+        playEnd = (TextView) rootView.findViewById(R.id.playerEnd);
 
         //Setup play,pause, previous and next tracks
         play = (ImageButton) rootView.findViewById(R.id.playButton);
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(isPaused){
-                      playSong(playPosition);
-                }else{
-                    pauseSong();
+                if (musicSrv.isPlaying()) {
+
+                    musicSrv.pause();
+                    play.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+
+                } else {
+                    //resume song
+                    if (!hasStarted){
+                        playSong(playPosition);
+                        hasStarted = true;
+                    } else {
+                        musicSrv.start();
+                    }
+
+
+                    play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
+
                 }
-                isPaused = !isPaused;
             }
         });
 
@@ -133,10 +235,13 @@ public class PlayerFragment extends Fragment {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (playPosition + 1 < trackList.size()) {
+
+                if (playPosition < trackList.size() - 1) {
                     playPosition++;
-                    stopSong();
-                    populateTrackUI(playPosition);
+                    playSong(playPosition);
+                } else {
+                    playPosition = 0;
+                    playSong(playPosition);
                 }
             }
         });
@@ -144,10 +249,12 @@ public class PlayerFragment extends Fragment {
         previous = (ImageButton) rootView.findViewById(R.id.playPrevious);
         previous.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if(playPosition - 1 > -1){
+                if(playPosition > 0){
                     playPosition--;
-                    stopSong();
-                    populateTrackUI(playPosition);
+                    playSong(playPosition);
+                } else {
+                    playPosition = trackList.size() - 1;
+                    playSong(playPosition);
                 }
             }
         });
@@ -158,49 +265,56 @@ public class PlayerFragment extends Fragment {
 
         }
 
-
         return rootView;
     }
+
+    private void playSong(int songIndex){
+        if(musicSrv.isPlaying()) {
+            musicSrv.pause();
+            musicSrv.reset();
+        }
+        play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
+        musicSrv.initMusicPlayer(songIndex);
+        if(hasStarted) {
+            populateTrackUI(playPosition);
+        } else {
+            hasStarted = true;
+        }
+
+    }
+
 
     @Override
     public void onPause() {
         super.onPause();
-        pauseSong();
+        musicSrv.pause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopSong();
+        getActivity().stopService(playIntent);
+        musicSrv=null;
+
     }
 
-    private void pauseSong(){
-        play.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
-        mediaPlayer.pause();
-        currentTrackPosition = mediaPlayer.getCurrentPosition();
-    }
-    private void stopSong(){
-        mediaPlayer.stop();
-        mediaPlayer.reset();
-        isPaused = true;
-        currentTrackPosition = 0;
-        play.setImageDrawable(getResources().getDrawable(R.drawable.button_play));
+    @Override
+    public void onClick(View view) {
+
     }
 
-    private void playSong(int songIndex){
-        try{
-            play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
-            mediaPlayer.setDataSource(trackList.get(songIndex).preview_url);
-            if(currentTrackPosition !=0) {
-                mediaPlayer.seekTo(currentTrackPosition);
-            }
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
-
-        }catch(Exception e){
-            Toast.makeText(getActivity(), "Sorry, cannot play this song", Toast.LENGTH_SHORT).show();
-        }
     }
 
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
 }

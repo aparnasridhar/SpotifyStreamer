@@ -24,7 +24,8 @@
         <activity
             android:name=".activity.TopTracksActivity"
             android:label="@string/title_activity_top_tracks"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName=".activity.MainActivity">
         </activity>
         <activity
             android:name=".activity.SettingsActivity"
@@ -33,8 +34,16 @@
         </activity>
         <activity
             android:name=".activity.PlayerActivity"
-            android:label="@string/title_activity_player" >
+            android:label="@string/title_activity_player"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName=".activity.TopTracksActivity" >
         </activity>
+
+        <service
+            android:name=".service.SpotifyMusicService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

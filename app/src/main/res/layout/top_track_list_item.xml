@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:minHeight="?android:attr/listPreferredItemHeight">
+    android:minHeight="?android:attr/listPreferredItemHeightLarge">
     <ImageView
         android:layout_width="60dp"
         android:layout_height="68dp"
         android:src="@drawable/ic_launcher"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minHeight="?android:attr/listPreferredItemHeightLarge"
         android:id="@+id/artist_image"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="15dp"
@@ -17,10 +17,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minHeight="?android:attr/listPreferredItemHeightLarge"
         android:layout_toRightOf="@+id/artist_image"
         android:layout_alignTop="@+id/artist_image"
         android:gravity="center_vertical"
         android:text="A Sky Full of Stars \nGhost Stories"
         android:id="@+id/artist_name" />
+
+
+
 </RelativeLayout>

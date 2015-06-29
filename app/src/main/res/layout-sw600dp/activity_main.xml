@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/main_container"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:baselineAligned="false"
+android:divider="?android:attr/dividerHorizontal"
+android:orientation="horizontal"
+tools:context="com.coderbloc.aparnasridhar.spotifystreamer.activity.MainActivity">
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_margin="0dp"
+        android:padding="0dp"
+        android:name="com.coderbloc.aparnasridhar.spotifystreamer.fragment.ArtistSearchFragment"
+        tools:context=".MainActivity">
+    </fragment>
+
+<FrameLayout
+    android:id="@+id/topTracksContainer"
+    android:layout_width="0dp"
+    android:layout_margin="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1" />
+
+</LinearLayout>

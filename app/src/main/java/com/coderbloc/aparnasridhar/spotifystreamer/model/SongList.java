@@ -7,7 +7,7 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * Created by aparnasridhar on 6/6/15.
  */
-public class SongList {
+public class SongList{
 
     public static List<Track> getTopTenSongs() {
         return topTenSongs;
@@ -19,5 +19,7 @@ public class SongList {
 
     private static List<Track> topTenSongs;
 
-
+    public static Track get(int position){
+        return topTenSongs.get(position);
+    }
 }

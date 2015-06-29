@@ -10,9 +10,12 @@
     <string name="pref_location_default" translatable="false">US</string>
     <string name="pref_location_key" translatable="false">location</string>
     <string name="title_activity_player">PlayerActivity</string>
+    <string name="title">Spotify Streamer</string>
 
+    <string name="artist_search_hint">Type an artist and hit enter</string>
     <string name="no_artists_error">No artists matched your search</string>
     <string name="no_track_error">No top ten tracks for this artist</string>
     <string name="no_internet">Not able to connect to Spotify Site.  Check network connectivity</string>
+    <string name="connection_error">Sorry something when wrong while connecting to Spotify</string>
 
 </resources>

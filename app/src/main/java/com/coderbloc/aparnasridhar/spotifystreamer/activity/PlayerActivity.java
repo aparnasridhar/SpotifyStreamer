@@ -1,6 +1,7 @@
 package com.coderbloc.aparnasridhar.spotifystreamer.activity;
 
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ public class PlayerActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
+        setTitle(R.string.title);
 
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.playerContainer, new PlayerFragment())
@@ -40,7 +42,17 @@ public class PlayerActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        if(id == android.R.id.home) {
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        NavUtils.navigateUpFromSameTask(this);
     }
 }
