@@ -74,6 +74,7 @@ public class TopTracksFragment extends Fragment {
     public void onResume(){
         super.onResume();
         if(trackList != null){
+            adapter.clear();
             adapter.addAll(trackList);
             adapter.notifyDataSetChanged();
         }
@@ -121,8 +122,12 @@ public class TopTracksFragment extends Fragment {
                     startActivity(intent);
                 }else{
                     DialogFragment playFragment = new PlayerFragment();
-                    playFragment.show(getActivity().getSupportFragmentManager(), "dialog");
 
+                    Bundle args = new Bundle();
+                    args.putInt(PlayerFragment.PLAY_POSITION_KEY, position);
+                    playFragment.setArguments(args);
+
+                    playFragment.show(getActivity().getSupportFragmentManager(), "dialog");
                 }
 
             }

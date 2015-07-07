@@ -11,14 +11,20 @@ import com.coderbloc.aparnasridhar.spotifystreamer.fragment.PlayerFragment;
 
 public class PlayerActivity extends ActionBarActivity {
 
+    public static final String FRAG_TAG = "Player";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
         setTitle(R.string.title);
 
+        PlayerFragment frag = (PlayerFragment) getSupportFragmentManager().findFragmentByTag(FRAG_TAG);
+
+        if(frag == null) {
+            frag = new PlayerFragment();
+        }
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.playerContainer, new PlayerFragment())
+                .replace(R.id.playerContainer,frag,FRAG_TAG)
                 .commit();
 
     }

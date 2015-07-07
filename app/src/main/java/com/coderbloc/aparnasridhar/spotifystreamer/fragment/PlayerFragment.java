@@ -45,11 +45,14 @@ public class PlayerFragment extends DialogFragment implements View.OnClickListen
     private TextView playStart;
     private TextView playEnd;
     private ProgressBar progressBar;
+    private boolean mTwoPane;
 
     private SpotifyMusicService musicSrv;
     private Intent playIntent;
     public ServiceConnection musicConnection;
     private SeekBar playerSeekBar;
+
+    public static final String PLAY_POSITION_KEY = "POSITION_KEY";
 
     //To update the seek bar
     Handler seekHandler = new Handler();
@@ -124,6 +127,14 @@ public class PlayerFragment extends DialogFragment implements View.OnClickListen
             playPosition = intent.getIntExtra("position",-1);
         }
 
+        mTwoPane = getActivity().findViewById(R.id.main_container) != null;
+
+        Bundle args = getArguments();
+        if (args != null && mTwoPane) {
+            playPosition = args.getInt(PLAY_POSITION_KEY);
+
+        }
+
         //Load all tracks
         final SongList tracks = new SongList();
         trackList = tracks.getTopTenSongs();
@@ -137,6 +148,7 @@ public class PlayerFragment extends DialogFragment implements View.OnClickListen
                 musicSrv = binder.getService();
                 //pass list
                 musicSrv.setPlayList(tracks);
+                musicSrv.setContext(getActivity());
                 //
                 playSong(playPosition);
             }
@@ -260,7 +272,7 @@ public class PlayerFragment extends DialogFragment implements View.OnClickListen
         });
 
         //Setup the track UI
-        if(playPosition !=-1 && trackList !=null) {
+        if(playPosition !=-1 && trackList !=null && playPosition < trackList.size()) {
             populateTrackUI(playPosition);
 
         }
@@ -269,17 +281,19 @@ public class PlayerFragment extends DialogFragment implements View.OnClickListen
     }
 
     private void playSong(int songIndex){
-        if(musicSrv.isPlaying()) {
+        if(musicSrv.isPlaying() || !musicSrv.isCompleted) {
             musicSrv.pause();
             musicSrv.reset();
         }
-        play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
+
         musicSrv.initMusicPlayer(songIndex);
         if(hasStarted) {
             populateTrackUI(playPosition);
+
         } else {
             hasStarted = true;
         }
+        play.setImageDrawable(getResources().getDrawable(R.drawable.button_pause));
 
     }
 

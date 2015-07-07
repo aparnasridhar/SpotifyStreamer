@@ -7,7 +7,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.coderbloc.aparnasridhar.spotifystreamer.model.SongList;
 
@@ -64,12 +64,15 @@ public class SpotifyMusicService extends Service implements
     public void initMusicPlayer(int position) {
 
         try {
+            isCompleted = false;
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             String path = playList.get(position).preview_url;
             mediaPlayer.setDataSource(playList.get(position).preview_url);
             mediaPlayer.prepareAsync();
         } catch (Exception ex){
-            Log.e("Error",ex.toString());
+            Toast.makeText(mContext,"Error playing the selected track", Toast.LENGTH_SHORT).show();
+            mediaPlayer.stop();
+            mediaPlayer.reset();
         }
 
     }
